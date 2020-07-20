@@ -15,14 +15,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.rakuten.assessment.R;
+import com.rakuten.assessment.component.QuickReturnLayout;
 import com.rakuten.assessment.model.ImageModel;
+import com.rakuten.assessment.utils.Log;
 import com.rakuten.assessment.view.adapter.ImageListAdapter;
 import com.rakuten.assessment.viewmodel.ImageListViewModel;
 
 public class MainFragment extends Fragment {
 
-  private TextView titleView;
+  private static final String TAG = Log.tag(MainFragment.class);
+  private TextView textView;
   private ImageListViewModel imageListViewModel;
+  private QuickReturnLayout quickReturnLayout;
 
   @Nullable
   @Override
@@ -34,7 +38,8 @@ public class MainFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
-    titleView = view.findViewById(R.id.title);
+    textView = view.findViewById(R.id.text_view);
+    quickReturnLayout = view.findViewById(R.id.quick_return_action_bar);
 
     ImageListAdapter imageListAdapter = new ImageListAdapter((v, position, imageModel) -> {
       imageListViewModel.setActiveImage(imageModel);
@@ -45,30 +50,29 @@ public class MainFragment extends Fragment {
     recyclerView.setHasFixedSize(true);
     recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
     recyclerView.setAdapter(imageListAdapter);
-    recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-      @Override
-      public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-        super.onScrollStateChanged(recyclerView, newState);
-      }
-
-      @Override
-      public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-        super.onScrolled(recyclerView, dx, dy);
-      }
-    });
 
     imageListViewModel = new ViewModelProvider(requireActivity()).get(ImageListViewModel.class);
-    imageListViewModel.getImages().observe(getViewLifecycleOwner(), imageListAdapter::submitList);
+    imageListViewModel.getImages().observe(getViewLifecycleOwner(), imageModels -> {
+      Log.d(TAG, "images updated %d", imageModels.size());
+      imageListAdapter.submitList(imageModels);
+    });
   }
 
   @Override
   public void onResume() {
     super.onResume();
 
+    if (getActivity() != null) {
+      quickReturnLayout.setTitle(R.id.title, (String) getActivity().getTitle());
+      quickReturnLayout.setOnReturnClick(v -> {
+        getParentFragmentManager().popBackStack();
+      });
+    }
+
     // update the titleView to active image's title
     ImageModel image = imageListViewModel.getActiveImage().getValue();
-    if (image != null && titleView != null) {
-      titleView.setText(image.title);
+    if (image != null && textView != null) {
+      textView.setText(image.title);
     }
   }
 }

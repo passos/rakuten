@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.gson.Gson;
 import com.rakuten.assessment.R;
 import com.rakuten.assessment.model.ImageModel;
 import com.rakuten.assessment.viewmodel.ImageListViewModel;
@@ -27,6 +28,7 @@ public class DetailFragment extends Fragment {
   private TextView ownerView;
   private TextView secretView;
   private TextView serverView;
+  private TextView jsonView;
 
   final private ViewTreeObserver.OnGlobalLayoutListener onGlobalLayoutListener = this::startObserveUI;
 
@@ -44,6 +46,7 @@ public class DetailFragment extends Fragment {
     ownerView = view.findViewById(R.id.owner);
     secretView = view.findViewById(R.id.secret);
     serverView = view.findViewById(R.id.server);
+    jsonView = view.findViewById(R.id.json);
 
     imageListViewModel = new ViewModelProvider(requireActivity()).get(ImageListViewModel.class);
 
@@ -69,5 +72,6 @@ public class DetailFragment extends Fragment {
     ownerView.setText(image.owner);
     secretView.setText(image.secret);
     serverView.setText(image.server);
+    jsonView.setText(new Gson().toJson(image));
   }
 }
